@@ -4,23 +4,37 @@ import { NextRequest } from "next/server";
 
 // Create a new ratelimiter that allows 50 requests per day per IP per endpoint
 export const getRateLimiter = (endpoint: string) => {
-  // Check if we're in a production environment to apply rate limiting
-  // In development, we don't want to be rate limited for testing
-  if (process.env.NODE_ENV !== "production" && !process.env.UPSTASH_REDIS_REST_URL) {
+  // Check if Upstash Redis is configured
+  const hasRedisUrl = !!process.env.UPSTASH_REDIS_REST_URL;
+  const hasRedisToken = !!process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  // Skip rate limiting if Redis is not configured
+  if (!hasRedisUrl || !hasRedisToken) {
+    // In production without Redis, log once (not per request)
+    if (process.env.NODE_ENV === "production" && !global._redisWarningShown) {
+      console.warn("[Rate Limiting] Upstash Redis not configured - rate limiting disabled");
+      console.warn("[Rate Limiting] Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to enable");
+      (global as any)._redisWarningShown = true;
+    }
     return null;
   }
 
-  // Requires the following environment variables:
-  // UPSTASH_REDIS_REST_URL
-  // UPSTASH_REDIS_REST_TOKEN
-  const redis = Redis.fromEnv();
+  try {
+    // Requires the following environment variables:
+    // UPSTASH_REDIS_REST_URL
+    // UPSTASH_REDIS_REST_TOKEN
+    const redis = Redis.fromEnv();
 
-  return new Ratelimit({
-    redis,
-    limiter: Ratelimit.fixedWindow(50, "1 d"),
-    analytics: true,
-    prefix: `ratelimit:${endpoint}`,
-  });
+    return new Ratelimit({
+      redis,
+      limiter: Ratelimit.fixedWindow(50, "1 d"),
+      analytics: true,
+      prefix: `ratelimit:${endpoint}`,
+    });
+  } catch (error) {
+    console.error("[Rate Limiting] Failed to initialize Redis:", error);
+    return null;
+  }
 };
 
 // Helper function to get the IP from a NextRequest or default to a placeholder

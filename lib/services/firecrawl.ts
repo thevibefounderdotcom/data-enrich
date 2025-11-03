@@ -5,7 +5,10 @@ export class FirecrawlService {
   private app: FirecrawlApp;
 
   constructor(apiKey: string) {
-    this.app = new FirecrawlApp({ apiKey });
+    this.app = new FirecrawlApp({
+      apiKey,
+      apiUrl: process.env.FIRECRAWL_API_URL || 'https://api.firecrawl.dev'
+    });
   }
 
   async search(
