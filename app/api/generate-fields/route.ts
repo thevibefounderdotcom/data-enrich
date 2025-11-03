@@ -3,9 +3,25 @@ import OpenAI from 'openai';
 import { zodResponseFormat } from 'openai/helpers/zod';
 import { z } from 'zod';
 import { FieldGenerationResponse } from '@/lib/types/field-generation';
+import { isRateLimited } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting check
+    const rateLimit = await isRateLimited(request, 'generate-fields');
+
+    if (!rateLimit.success) {
+      return NextResponse.json({
+        error: 'Rate limit exceeded. Please try again later.'
+      }, {
+        status: 429,
+        headers: {
+          'X-RateLimit-Limit': rateLimit.limit.toString(),
+          'X-RateLimit-Remaining': rateLimit.remaining.toString(),
+        }
+      });
+    }
+
     const { prompt } = await request.json();
 
     if (!prompt || typeof prompt !== 'string') {

@@ -93,11 +93,11 @@ export function CSVUploader({ onUpload }: CSVUploaderProps) {
           relative overflow-hidden
           border-2 border-dashed rounded-xl text-center cursor-pointer
           transition-all duration-300 ease-out min-h-[150px]
-          flex flex-col items-center justify-center
+          flex flex-col items-center justify-center glass-panel
           ${
             isDragActive
-              ? "border-heat-100 bg-heat-4 shadow-xl"
-              : "border-border-muted hover:border-heat-100 bg-accent-white hover:bg-heat-4 hover:shadow-lg"
+              ? "border-heat-100 glass-strong shadow-xl"
+              : "border-white/40 hover:border-heat-100 hover:glass-strong hover:shadow-lg"
           }
           ${isProcessing ? "opacity-50 cursor-not-allowed" : ""}
         `}
@@ -170,7 +170,7 @@ export function CSVUploader({ onUpload }: CSVUploaderProps) {
       </div>
 
       {error && (
-        <div className="mt-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl animate-fade-in shadow-sm">
+        <div className="mt-6 p-4 glass-panel border-red-300/50 bg-red-50/80 text-red-700 rounded-xl animate-fade-in shadow-lg">
           <p className="font-semibold mb-1 text-accent-crimson">Error:</p>
           <p className="text-sm whitespace-pre-line text-red-600">{error}</p>
         </div>

@@ -3,6 +3,7 @@ import { AgentEnrichmentStrategy } from '@/lib/strategies/agent-enrichment-strat
 import type { EnrichmentRequest, RowEnrichmentResult } from '@/lib/types';
 import { loadSkipList, shouldSkipEmail, getSkipReason } from '@/lib/utils/skip-list';
 import { ENRICHMENT_CONFIG } from '@/lib/config/enrichment';
+import { isRateLimited } from '@/lib/rate-limit';
 
 // Use Node.js runtime for better compatibility
 export const runtime = 'nodejs';
@@ -12,6 +13,21 @@ const activeSessions = new Map<string, AbortController>();
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting check
+    const rateLimit = await isRateLimited(request, 'enrich');
+
+    if (!rateLimit.success) {
+      return NextResponse.json({
+        error: 'Rate limit exceeded. Please try again later.'
+      }, {
+        status: 429,
+        headers: {
+          'X-RateLimit-Limit': rateLimit.limit.toString(),
+          'X-RateLimit-Remaining': rateLimit.remaining.toString(),
+        }
+      });
+    }
+
     // Add request body size check
     const contentLength = request.headers.get('content-length');
     if (contentLength && parseInt(contentLength) > 5 * 1024 * 1024) { // 5MB limit

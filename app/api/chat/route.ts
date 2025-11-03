@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { FirecrawlService } from '@/lib/services/firecrawl';
 import { OpenAIService } from '@/lib/services/openai';
+import { isRateLimited } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 
@@ -9,6 +10,21 @@ const activeQueries = new Map<string, AbortController>();
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting check
+    const rateLimit = await isRateLimited(request, 'chat');
+
+    if (!rateLimit.success) {
+      return NextResponse.json({
+        error: 'Rate limit exceeded. Please try again later.'
+      }, {
+        status: 429,
+        headers: {
+          'X-RateLimit-Limit': rateLimit.limit.toString(),
+          'X-RateLimit-Remaining': rateLimit.remaining.toString(),
+        }
+      });
+    }
+
     const { question, context, conversationHistory, sessionId } = await request.json();
 
     if (!question || !question.trim()) {

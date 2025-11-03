@@ -3,7 +3,7 @@ const isUnlimitedMode =
   process.env.FIRE_ENRICH_UNLIMITED === "true" ||
   process.env.NODE_ENV === "development";
 
-// Configuration for Fire Enrich
+// Configuration for Data Enrich
 export const FIRE_ENRICH_CONFIG = {
   // CSV upload limits
   CSV_LIMITS: {
