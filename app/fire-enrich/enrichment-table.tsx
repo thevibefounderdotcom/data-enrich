@@ -13,6 +13,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { ChatPanel, ChatMessage } from "./chat-panel";
+import { DomainFilterSettings } from "./unified-enrichment-view";
+import { shouldEnrichEmail } from "@/lib/utils/email-categorization";
 import {
   Download,
   X,
@@ -34,13 +36,27 @@ interface EnrichmentTableProps {
   rows: CSVRow[];
   fields: EnrichmentField[];
   emailColumn?: string;
+  domainFilter?: DomainFilterSettings;
 }
 
 export function EnrichmentTable({
   rows,
   fields,
   emailColumn,
+  domainFilter,
 }: EnrichmentTableProps) {
+  // Filter rows based on domain filter before enrichment
+  const filteredRows = rows.filter((row) => {
+    if (!emailColumn || !domainFilter) return true;
+
+    const email = row[emailColumn];
+    if (!email || typeof email !== 'string') return false;
+
+    return shouldEnrichEmail(email, {
+      includePersonal: domainFilter.includePersonal,
+      includeCompany: domainFilter.includeCompany,
+    });
+  });
   const [results, setResults] = useState<Map<number, RowEnrichmentResult>>(
     new Map(),
   );
@@ -136,7 +152,7 @@ export function EnrichmentTable({
         method: "POST",
         headers,
         body: JSON.stringify({
-          rows,
+          rows: filteredRows,
           fields,
           emailColumn,
           useAgents,
@@ -385,7 +401,7 @@ export function EnrichmentTable({
     const exportData = {
       metadata: {
         exportDate: new Date().toISOString(),
-        totalRows: rows.length,
+        totalRows: filteredRows.length,
         processedRows: results.size,
         fields: fields.map((f) => ({
           name: f.name,
@@ -394,7 +410,7 @@ export function EnrichmentTable({
         })),
         status: status,
       },
-      data: rows.map((row, index) => {
+      data: filteredRows.map((row, index) => {
         const result = results.get(index);
         const email = emailColumn ? row[emailColumn] : Object.values(row)[0];
 
@@ -572,7 +588,7 @@ export function EnrichmentTable({
         }));
 
       // Build full table context with enriched data as formatted string
-      const tableDataRows = rows.map((row, index) => {
+      const tableDataRows = filteredRows.map((row, index) => {
         const result = results.get(index);
         if (!result || result.status === 'pending') return null;
 
@@ -605,7 +621,7 @@ export function EnrichmentTable({
           context: {
             emailColumn,
             fields: fields.map((f) => ({ name: f.name, displayName: f.displayName })),
-            totalRows: rows.length,
+            totalRows: filteredRows.length,
             processedRows: results.size,
             tableData: tableDataString, // Include formatted table data as string
           },
@@ -763,7 +779,7 @@ export function EnrichmentTable({
               </h3>
               <div className="flex items-center gap-4 mt-1">
                 <span className="text-body-small text-zinc-600">
-                  {results.size} of {rows.length} rows processed
+                  {results.size} of {filteredRows.length} rows processed
                 </span>
                 {(() => {
                   const skippedCount = Array.from(results.values()).filter(
@@ -836,7 +852,7 @@ export function EnrichmentTable({
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map((row, index) => {
+                  {filteredRows.map((row, index) => {
                 const result = results.get(index);
                 const isProcessing =
                   currentRow === index && status === "processing";
@@ -1112,7 +1128,7 @@ export function EnrichmentTable({
                     </Badge>
                   )}
                   <span className="text-body-small text-gray-600">
-                    Row {selectedRow.index + 1} of {rows.length}
+                    Row {selectedRow.index + 1} of {filteredRows.length}
                   </span>
                 </div>
 
@@ -1457,7 +1473,7 @@ export function EnrichmentTable({
         onSendMessage={handleChatMessage}
         onStopQuery={handleStopQuery}
         isProcessing={isChatProcessing}
-        totalRows={rows.length}
+        totalRows={filteredRows.length}
         results={results}
         onExpandedChange={setIsChatExpanded}
       />

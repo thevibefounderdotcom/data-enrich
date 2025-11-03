@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 //Enrich Specific Components
 import { CSVUploader } from "./fire-enrich/csv-uploader";
-import { UnifiedEnrichmentView } from "./fire-enrich/unified-enrichment-view";
+import { UnifiedEnrichmentView, DomainFilterSettings } from "./fire-enrich/unified-enrichment-view";
 import { EnrichmentTable } from "./fire-enrich/enrichment-table";
 import { CSVRow, EnrichmentField } from "@/lib/types";
 
@@ -52,6 +52,11 @@ export default function HomePage() {
   } | null>(null);
   const [emailColumn, setEmailColumn] = useState<string>("");
   const [selectedFields, setSelectedFields] = useState<EnrichmentField[]>([]);
+  const [domainFilter, setDomainFilter] = useState<DomainFilterSettings>({
+    includePersonal: true,
+    includeCompany: false,
+    filteredRowCount: 0,
+  });
   const [isCheckingEnv, setIsCheckingEnv] = useState(true);
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
   const [firecrawlApiKey, setFirecrawlApiKey] = useState<string>("");
@@ -129,9 +134,14 @@ export default function HomePage() {
     }
   };
 
-  const handleStartEnrichment = (email: string, fields: EnrichmentField[]) => {
+  const handleStartEnrichment = (
+    email: string,
+    fields: EnrichmentField[],
+    filter: DomainFilterSettings
+  ) => {
     setEmailColumn(email);
     setSelectedFields(fields);
+    setDomainFilter(filter);
     setStep("enrichment");
   };
 
@@ -365,6 +375,7 @@ export default function HomePage() {
                         rows={csvData.rows}
                         fields={selectedFields}
                         emailColumn={emailColumn}
+                        domainFilter={domainFilter}
                       />
                     </motion.div>
                   )}

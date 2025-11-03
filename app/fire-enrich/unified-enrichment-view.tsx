@@ -29,11 +29,22 @@ import { generateVariableName } from "@/lib/utils/field-utils";
 import { X, Plus, Sparkles, ChevronDown, ChevronUp, ArrowLeft, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { AlertCircle } from "lucide-react";
+import { DomainFilter } from "./domain-filter";
+
+export interface DomainFilterSettings {
+  includePersonal: boolean;
+  includeCompany: boolean;
+  filteredRowCount: number;
+}
 
 interface UnifiedEnrichmentViewProps {
   rows: CSVRow[];
   columns: string[];
-  onStartEnrichment: (emailColumn: string, fields: EnrichmentField[]) => void;
+  onStartEnrichment: (
+    emailColumn: string,
+    fields: EnrichmentField[],
+    domainFilter: DomainFilterSettings
+  ) => void;
 }
 
 const PRESET_FIELDS: EnrichmentField[] = [
@@ -117,6 +128,11 @@ export function UnifiedEnrichmentView({
   const [showAllRows, setShowAllRows] = useState(false);
   const [showEmailDropdown, setShowEmailDropdown] = useState(false);
   const [showEmailDropdownStep1, setShowEmailDropdownStep1] = useState(false);
+  const [domainFilter, setDomainFilter] = useState<DomainFilterSettings>({
+    includePersonal: true,
+    includeCompany: false,
+    filteredRowCount: 0,
+  });
   const [customField, setCustomField] = useState<{
     name: string;
     description: string;
@@ -610,6 +626,15 @@ export function UnifiedEnrichmentView({
               </div>
             </div>
 
+            {/* Domain Filter */}
+            {emailColumn && (
+              <DomainFilter
+                rows={rows}
+                emailColumn={emailColumn}
+                onFilterChange={setDomainFilter}
+              />
+            )}
+
             {/* Preset fields */}
             <Card className="p-16 border-gray-200 bg-white rounded-8">
               <Label className="text-body-medium font-semibold text-gray-900 mb-12 block">
@@ -848,11 +873,11 @@ export function UnifiedEnrichmentView({
                 Back
               </button>
               <button
-                onClick={() => onStartEnrichment(emailColumn, selectedFields)}
-                disabled={selectedFields.length === 0}
+                onClick={() => onStartEnrichment(emailColumn, selectedFields, domainFilter)}
+                disabled={selectedFields.length === 0 || domainFilter.filteredRowCount === 0}
                 className="rounded-8 px-10 py-6 gap-4 text-body-medium text-accent-black bg-black-alpha-4 hover:bg-black-alpha-6 transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Start Enrichment
+                Start Enrichment ({domainFilter.filteredRowCount} emails)
               </button>
             </div>
           </motion.div>
