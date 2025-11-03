@@ -4,6 +4,11 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
+  // Skip middleware for API routes to avoid conflicts with streaming responses
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    return response;
+  }
+
   // Security Headers
   const headers = response.headers;
 
@@ -12,11 +17,11 @@ export function middleware(request: NextRequest) {
     'Content-Security-Policy',
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline'", // Next.js requires unsafe-eval and unsafe-inline
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live https://*.vercel-scripts.com", // Next.js + Vercel
       "style-src 'self' 'unsafe-inline'", // Tailwind requires unsafe-inline
       "img-src 'self' data: https: blob:", // Allow images from HTTPS and data URLs
       "font-src 'self' data:",
-      "connect-src 'self' https://api.openai.com https://api.firecrawl.dev https://*.upstash.io",
+      "connect-src 'self' https://api.openai.com https://api.firecrawl.dev https://*.upstash.io https://vercel.live wss://vercel.live",
       "frame-ancestors 'none'", // Prevent clickjacking
       "base-uri 'self'",
       "form-action 'self'",

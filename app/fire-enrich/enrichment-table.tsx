@@ -43,11 +43,15 @@ export function EnrichmentTable({
   rows,
   fields,
   emailColumn,
-  domainFilter,
+  domainFilter = {
+    includePersonal: true,
+    includeCompany: true,
+    filteredRowCount: rows.length,
+  },
 }: EnrichmentTableProps) {
   // Filter rows based on domain filter before enrichment
   const filteredRows = rows.filter((row) => {
-    if (!emailColumn || !domainFilter) return true;
+    if (!emailColumn) return true;
 
     const email = row[emailColumn];
     if (!email || typeof email !== 'string') return false;
