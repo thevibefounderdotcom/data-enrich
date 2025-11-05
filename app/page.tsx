@@ -26,8 +26,17 @@ import HeroScraping from "@/components/app/(home)/sections/hero-scraping/HeroScr
 import HeaderBrandKit from "@/components/shared/header/BrandKit/BrandKit";
 import HeaderWrapper from "@/components/shared/header/Wrapper/Wrapper";
 import HeaderDropdownWrapper from "@/components/shared/header/Dropdown/Wrapper/Wrapper";
-import GithubIcon from "@/components/shared/header/Github/_svg/GithubIcon";
 import ButtonUI from "@/components/shared/button/button";
+
+// Import new homepage components
+import { HeroSection } from "@/components/home/hero-section";
+import { HowItWorks } from "@/components/home/how-it-works";
+import { DomainFilteringShowcase } from "@/components/home/domain-filtering-showcase";
+import { DataPointsGrid } from "@/components/home/data-points-grid";
+import { EnterpriseSecurity } from "@/components/home/enterprise-security";
+import { PricingSection } from "@/components/home/pricing-section";
+import { SocialProof } from "@/components/home/social-proof";
+import { FooterCTA } from "@/components/home/footer-cta";
 
 // Ui Imports
 import { toast } from "sonner";
@@ -241,18 +250,6 @@ export default function HomePage() {
               <div className="flex gap-24 items-center">
                 <HeaderBrandKit />
               </div>
-              <div className="flex gap-8">
-                <a
-                  className="contents"
-                  href="https://github.com/firecrawl/fire-enrich"
-                  target="_blank"
-                >
-                  <ButtonUI variant="tertiary">
-                    <GithubIcon />
-                    Use this Template
-                  </ButtonUI>
-                </a>
-              </div>
             </div>
           ) : (
             <HeaderWrapper>
@@ -260,146 +257,27 @@ export default function HomePage() {
                 <div className="flex gap-24 items-center">
                   <HeaderBrandKit />
                 </div>
-                <div className="flex gap-8">
-                  <a
-                    className="contents"
-                    href="https://github.com/firecrawl/fire-enrich"
-                    target="_blank"
-                  >
-                    <ButtonUI variant="tertiary">
-                      <GithubIcon />
-                      Use this Template
-                    </ButtonUI>
-                  </a>
-                </div>
               </div>
             </HeaderWrapper>
           )}
         </div>
 
-        {/* Hero Section */}
-        <section className="overflow-x-clip" id="home-hero">
-          <div
-            className={`pt-28 lg:pt-254 lg:-mt-100 ${step === "upload" ? "pb-115" : "pb-20"} relative `}
-            id="hero-content"
-          >
-            <HomeHeroPixi />
-            <HeroFlame />
+        {/* Content Section */}
+        {step === "upload" ? (
+          <>
+            {/* New Marketing Homepage */}
+            <HeroSection />
 
-            <HomeHeroBackground />
-
-            <AnimatePresence mode="wait">
-              {step == "upload" ? (
+            {/* Upload Section */}
+            <section id="upload-section" className="relative py-16 px-6">
+              <div className="max-w-3xl mx-auto">
                 <motion.div
-                  key="hero"
-                  initial={{ opacity: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.5 }}
-                  className="relative container px-16"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6 }}
+                  className="glass-panel p-8 rounded-24 shadow-xl"
                 >
-                  <HomeHeroBadge />
-                  <HomeHeroTitle />
-
-                  <p className="text-center text-body-large">
-                    Enrich you leads with clean & accurate data
-                    <br className="lg-max:hidden" />
-                    crawled from all over the internet.
-                  </p>
-                  <Link
-                    className="bg-black-alpha-4 hover:bg-black-alpha-6 rounded-6 px-8 lg:px-6 text-label-large h-30 lg:h-24 block mt-8 mx-auto w-max gap-4 transition-all"
-                    href="https://firecrawl.dev"
-                  >
-                    Powered by Firecrawl
-                  </Link>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="enrichment-process"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    duration: 0.5,
-                    ease: [0.22, 1, 0.36, 1]
-                  }}
-                  className="relative container px-8 lg:px-16"
-                >
-                  <div className="text-center mb-8 lg:mb-12">
-                    <HomeHeroBadge />
-                    <div className="mb-6">
-                      <h1 className="text-title-h2 lg:text-title-h1 text-zinc-900 mb-4">
-                        {step === "setup"
-                          ? "Configure Enrichment"
-                          : "Enrichment Results"}
-                      </h1>
-                      <p className="text-center text-body-large text-gray-600">
-                        {step === "setup"
-                          ? "Select the fields you want to enrich and configure your settings"
-                          : "Your enriched data is ready. Click on any row to view detailed information"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {step === "setup" && (
-                    <div className="w-full max-w-7xl mx-auto relative z-[11] lg:z-[2]">
-                      <div
-                        className="bg-accent-white rounded-lg p-6 lg:p-10"
-                        style={{
-                          boxShadow:
-                            "0px 0px 44px 0px rgba(0, 0, 0, 0.02), 0px 88px 56px -20px rgba(0, 0, 0, 0.03), 0px 56px 56px -20px rgba(0, 0, 0, 0.02), 0px 32px 32px -20px rgba(0, 0, 0, 0.03), 0px 16px 24px -12px rgba(0, 0, 0, 0.03), 0px 0px 0px 1px rgba(0, 0, 0, 0.05), 0px 0px 0px 10px #F9F9F9",
-                        }}
-                      >
-                        {csvData && (
-                          <div className="w-full">
-                            <UnifiedEnrichmentView
-                              rows={csvData.rows}
-                              columns={csvData.columns}
-                              onStartEnrichment={handleStartEnrichment}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {step === "enrichment" && csvData && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.98, y: 20 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      transition={{
-                        duration: 0.6,
-                        ease: [0.22, 1, 0.36, 1] // Custom cubic-bezier for smooth easing
-                      }}
-                      className="fixed inset-0 top-[72px] z-50 bg-background-base"
-                    >
-                      <EnrichmentTable
-                        rows={csvData.rows}
-                        fields={selectedFields}
-                        emailColumn={emailColumn}
-                        domainFilter={domainFilter}
-                      />
-                    </motion.div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-          {step == "upload" && (
-            <motion.div
-              className="container lg:contents !p-16 relative -mt-90"
-              initial={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="max-w-400 lg:min-w-700 mx-auto w-full relative z-[11] lg:z-[2] rounded-20 -mt-30 lg:-mt-98">
-                <div
-                  className="overlay bg-accent-white"
-                  style={{
-                    boxShadow:
-                      "0px 0px 44px 0px rgba(0, 0, 0, 0.02), 0px 88px 56px -20px rgba(0, 0, 0, 0.03), 0px 56px 56px -20px rgba(0, 0, 0, 0.02), 0px 32px 32px -20px rgba(0, 0, 0, 0.03), 0px 16px 24px -12px rgba(0, 0, 0, 0.03), 0px 0px 0px 1px rgba(0, 0, 0, 0.05), 0px 0px 0px 10px #F9F9F9",
-                  }}
-                />
-
-                <div className="p-16 flex flex-col justify-center relative lg:min-w-[700px]">
                   {isCheckingEnv ? (
                     <div className="text-center py-10">
                       <Loader2 style={{ width: '36px', height: '36px', minWidth: '36px', minHeight: '36px' }} className="animate-spin text-primary mx-auto mb-4" />
@@ -412,19 +290,99 @@ export default function HomePage() {
                       <CSVUploader onUpload={handleCSVUpload} />
                     </div>
                   )}
+                </motion.div>
+              </div>
+            </section>
+
+            {/* Marketing Sections */}
+            <HowItWorks />
+            <DomainFilteringShowcase />
+            <DataPointsGrid />
+            <EnterpriseSecurity />
+            <PricingSection />
+            <SocialProof />
+            <FooterCTA />
+          </>
+        ) : (
+          <section className="overflow-x-clip" id="home-hero">
+            <div
+              className="pt-28 lg:pt-254 lg:-mt-100 pb-20 relative"
+              id="hero-content"
+            >
+              <HomeHeroPixi />
+              <HeroFlame />
+              <HomeHeroBackground />
+
+              <motion.div
+                key="enrichment-process"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.5,
+                  ease: [0.22, 1, 0.36, 1]
+                }}
+                className="relative container px-8 lg:px-16"
+              >
+                <div className="text-center mb-8 lg:mb-12">
+                  <HomeHeroBadge />
+                  <div className="mb-6">
+                    <h1 className="text-title-h2 lg:text-title-h1 text-zinc-900 mb-4">
+                      {step === "setup"
+                        ? "Configure Enrichment"
+                        : "Enrichment Results"}
+                    </h1>
+                    <p className="text-center text-body-large text-gray-600">
+                      {step === "setup"
+                        ? "Select the fields you want to enrich and configure your settings"
+                        : "Your enriched data is ready. Click on any row to view detailed information"}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          )}
-          {step === "upload" && (
-            <div className="flex items-center justify-center">
-              <div className="hidden md:block">
-                <BackgroundOuterPiece />
-              </div>
-              <HeroScraping />
+
+                {step === "setup" && (
+                  <div className="w-full max-w-7xl mx-auto relative z-[11] lg:z-[2]">
+                    <div
+                      className="bg-accent-white rounded-lg p-6 lg:p-10"
+                      style={{
+                        boxShadow:
+                          "0px 0px 44px 0px rgba(0, 0, 0, 0.02), 0px 88px 56px -20px rgba(0, 0, 0, 0.03), 0px 56px 56px -20px rgba(0, 0, 0, 0.02), 0px 32px 32px -20px rgba(0, 0, 0, 0.03), 0px 16px 24px -12px rgba(0, 0, 0, 0.03), 0px 0px 0px 1px rgba(0, 0, 0, 0.05), 0px 0px 0px 10px #F9F9F9",
+                      }}
+                    >
+                      {csvData && (
+                        <div className="w-full">
+                          <UnifiedEnrichmentView
+                            rows={csvData.rows}
+                            columns={csvData.columns}
+                            onStartEnrichment={handleStartEnrichment}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {step === "enrichment" && csvData && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.98, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{
+                      duration: 0.6,
+                      ease: [0.22, 1, 0.36, 1]
+                    }}
+                    className="fixed inset-0 top-[72px] z-50 bg-background-base"
+                  >
+                    <EnrichmentTable
+                      rows={csvData.rows}
+                      fields={selectedFields}
+                      emailColumn={emailColumn}
+                      domainFilter={domainFilter}
+                    />
+                  </motion.div>
+                )}
+              </motion.div>
             </div>
-          )}
-        </section>
+          </section>
+        )}
       </div>
       {/*Dialog Input for BYOK*/}
       <Dialog open={showApiKeyModal} onOpenChange={setShowApiKeyModal}>
